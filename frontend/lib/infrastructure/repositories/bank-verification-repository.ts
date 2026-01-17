@@ -10,7 +10,7 @@ export class ApiBankVerificationRepository implements BankVerificationRepository
   private baseUrl: string
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+    this.baseUrl = baseUrl || process.env.API_BASE_URL
   }
 
   async verify(user: User, bank: Bank): Promise<VerificationResult> {

@@ -93,14 +93,14 @@ func validateIBAN(iban string) bool {
 // Health check handler
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	response := HealthResponse{
 		Status:    "healthy",
 		Service:   "bank-verification-api",
 		Version:   "1.0.0",
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
-	
+
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -179,7 +179,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	log.Printf("Verification successful: ID=%s, User=%s, Bank=%s", 
+	log.Printf("Verification successful: ID=%s, User=%s, Bank=%s",
 		verificationID, req.User.Email, req.Bank.Name)
 
 	json.NewEncoder(w).Encode(response)
@@ -189,9 +189,6 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
 
 	// Routes
 	http.HandleFunc("/health", corsMiddleware(healthHandler))
