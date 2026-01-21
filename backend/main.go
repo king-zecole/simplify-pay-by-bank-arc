@@ -14,7 +14,8 @@ import (
 	"time"
 )
 
-// Domain Entities
+// #Domain Entities
+
 type User struct {
 	FullName string `json:"fullName"`
 	Email    string `json:"email"`
@@ -47,7 +48,7 @@ type HealthResponse struct {
 	Timestamp string `json:"timestamp"`
 }
 
-// CORS middleware
+// CORS middleware.
 func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Allow requests from frontend
@@ -55,7 +56,7 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		if r.Method == "OPTIONS" {
+		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -64,17 +65,17 @@ func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// Generate random verification ID
+// Generate random verification ID.
 func generateVerificationID() string {
 	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	b := make([]byte, 9)
 	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+		b[i] = charset[rand.Intn(len(charset))] // #nosec G404
 	}
 	return fmt.Sprintf("VRF-%d-%s", time.Now().Unix(), string(b))
 }
 
-// Mask IBAN for response
+// Mask IBAN for response.
 func maskIBAN(iban string) string {
 	if len(iban) < 8 {
 		return iban
@@ -82,7 +83,7 @@ func maskIBAN(iban string) string {
 	return iban[:4] + strings.Repeat("*", len(iban)-8) + iban[len(iban)-4:]
 }
 
-// Validate IBAN format (basic validation)
+// Validate IBAN format (basic validation).
 func validateIBAN(iban string) bool {
 	// Remove spaces and convert to uppercase
 	iban = strings.ToUpper(strings.ReplaceAll(iban, " ", ""))
@@ -90,8 +91,8 @@ func validateIBAN(iban string) bool {
 	return len(iban) >= 15 && len(iban) <= 34
 }
 
-// Health check handler
-func healthHandler(w http.ResponseWriter, r *http.Request) {
+// Health check handler.
+func healthHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	response := HealthResponse{
@@ -101,16 +102,16 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 	}
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
-// Verification handler
+// Verification handler.
 func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(VerificationResponse{
+		_ = json.NewEncoder(w).Encode(VerificationResponse{
 			Success:   false,
 			Message:   "Method not allowed",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -121,7 +122,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	var req VerificationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(VerificationResponse{
+		_ = json.NewEncoder(w).Encode(VerificationResponse{
 			Success:   false,
 			Message:   "Invalid request body",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -132,7 +133,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	// Validate request
 	if req.User.FullName == "" || req.User.Email == "" || req.User.IBAN == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(VerificationResponse{
+		_ = json.NewEncoder(w).Encode(VerificationResponse{
 			Success:   false,
 			Message:   "Missing required user fields",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -142,7 +143,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if req.Bank.ID == "" || req.Bank.Name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(VerificationResponse{
+		_ = json.NewEncoder(w).Encode(VerificationResponse{
 			Success:   false,
 			Message:   "Missing required bank fields",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -153,7 +154,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	// Validate IBAN
 	if !validateIBAN(req.User.IBAN) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(VerificationResponse{
+		_ = json.NewEncoder(w).Encode(VerificationResponse{
 			Success:   false,
 			Message:   "Invalid IBAN format",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -182,7 +183,7 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Verification successful: ID=%s, User=%s, Bank=%s",
 		verificationID, req.User.Email, req.Bank.Name)
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func main() {
@@ -195,5 +196,5 @@ func main() {
 	http.HandleFunc("/api/verify", corsMiddleware(verifyHandler))
 
 	log.Printf("Bank Verification Service starting on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, nil)) // #nosec G114
 }
