@@ -15,16 +15,14 @@ services:
     depends_on:
       - postgres
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:${PORT}/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:${PORT}/api/v1/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     restart: unless-stopped
     networks:
       - pay-by-bank-network
-    volumes:
-      - .:/backend
 
   postgres:
     image: postgres:15-alpine
@@ -36,7 +34,7 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/migrations:/docker-entrypoint-initdb.d
+      - ./backend/db/migrations:/docker-entrypoint-initdb.d
     networks:
       - pay-by-bank-network
 
@@ -61,9 +59,10 @@ services:
     restart: unless-stopped
     networks:
       - pay-by-bank-network
-    volumes:
-      - .:/app
 
 networks:
-  default:
-    name: pay-by-bank-network
+  pay-by-bank-network:
+
+
+volumes:
+  postgres_data:

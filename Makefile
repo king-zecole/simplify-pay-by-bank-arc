@@ -1,37 +1,34 @@
 env:
 	@if not exist .env copy .env.example .env
 
-build-app: env
-	docker compose build app
+build: env
+	docker compose build
 
-dev: build-app
-	docker compose run --rm app sh
+server: build
+	docker compose up -d
 
-server: build-app
-	docker compose up -d app
-
-run-all: build-app \
+run-all: build \
 	migrate \
 	server
 
 lint:
 	golangci-lint run -v --fix
 
-test: build-app
+test: build
 	go test -shuffle=on -count=1 ./backend/...
 
 clean:
 	docker compose down --remove-orphans --volumes
 
-generate: build-app
-	docker compose run --rm app sh ./backend/scripts/generate.sh
+generate: build
+	docker compose run --rm backend sh scripts/generate.sh
 
-create-migration: build-app
-	docker compose run --rm app sh backend/db/scripts/create_migration.sh $(name)
+create-migration: build
+	docker compose run --rm backend sh db/scripts/create_migration.sh $(name)
 
 migrate:
 	docker compose up -d postgres
-	docker compose run --rm app sh backend/db/scripts/migrate.sh
+	docker compose run --rm backend sh db/scripts/migrate.sh
 
-schema-dump: build-app
-	docker compose run --rm app sh -c "sh backend/db/scripts/dump.sh > backend/db/schema.sql"
+schema-dump: build
+	docker compose run --rm backend sh -c "sh db/scripts/dump.sh > backend/db/schema.sql"
