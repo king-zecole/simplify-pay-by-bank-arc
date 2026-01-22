@@ -24,15 +24,18 @@ test-app:
 clean:
 	docker compose down --remove-orphans --volumes
 
-generate: build
+generate: env
+	docker compose build backend
 	docker compose run --rm backend sh scripts/generate.sh
 
-create-migration: build
+create-migration: env
+	docker compose build backend
 	docker compose run --rm backend sh db/scripts/create_migration.sh $(name)
 
 migrate:
 	docker compose up -d postgres
 	docker compose run --rm backend sh db/scripts/migrate.sh
 
-schema-dump: build
+schema-dump: env
+	docker compose build backend
 	docker compose run --rm backend sh -c "sh db/scripts/dump.sh > backend/db/schema.sql"
