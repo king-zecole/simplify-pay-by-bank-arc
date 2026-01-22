@@ -27,7 +27,7 @@ WORKDIR /app
 RUN apk --no-cache add ca-certificates netcat-openbsd postgresql-client curl \
     && curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.tar.gz | tar xvz \
     && mv migrate /usr/local/bin/migrate \
-    && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+    && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.8.0
 
 # Copy binary from builder
 COPY --from=builder /app/main /usr/local/bin/app-server
