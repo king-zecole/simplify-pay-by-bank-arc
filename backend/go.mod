@@ -1,6 +1,6 @@
 module kingzecole/pay-by-bank-service
 
-go 1.22.5
+go 1.25.6
 
 require (
 	github.com/getkin/kin-openapi v0.133.0
